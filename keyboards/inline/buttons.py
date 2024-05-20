@@ -16,28 +16,6 @@ def check_user_ibuttons(status: str):
     return markup
 
 
-async def battle_main_ibuttons(back_text: str, back_callback: str):
-    all_books = await db.select_all_tables()
-
-    builder = InlineKeyboardBuilder()
-
-    for book in all_books:
-        if not book['questions']:
-            pass
-        else:
-            builder.add(
-                InlineKeyboardButton(
-                    text=f"{book['table_name']}", callback_data=f"table_{book['id']}"
-                )
-            )
-    builder.add(
-        InlineKeyboardButton(text=f"⬅️ {back_text}", callback_data=f"{back_callback}")
-    )
-    builder.adjust(1)
-
-    return builder.as_markup()
-
-
 def battle_ibuttons(random_opponent: str, offer_opponent: str, playing_alone: str, back: str, back_callback: str,
                     book_id: str):
 

@@ -1,8 +1,9 @@
 from aiogram import Router, F, types
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from handlers.users.start import uz_start_buttons
-from keyboards.inline.buttons import battle_ibuttons, battle_main_ibuttons
+from keyboards.inline.buttons import battle_ibuttons
 from loader import db
 
 router = Router()
@@ -19,18 +20,31 @@ async def result_time_game(start_time, end_time):
 
 @router.message(F.text == "⚔️ Bellashuv")
 async def uz_battle_main(message: types.Message, state: FSMContext):
+    await state.clear()
     telegram_id = message.from_user.id
     # Users jadvalidan game_on ustunini FALSE holatiga tushirish
     await db.edit_status_users(
         game_on=False, telegram_id=telegram_id
     )
+    all_books = await db.select_all_tables()
+    builder = InlineKeyboardBuilder()
+    for book in all_books:
+        if not book['questions']:
+            pass
+        else:
+            builder.add(
+                types.InlineKeyboardButton(
+                    text=f"{book['table_name']}", callback_data=f"table_{book['id']}"
+                )
+            )
+    builder.add(
+        types.InlineKeyboardButton(text=f"⬅️ Ortga", callback_data=f"back_battle_main")
+    )
+    builder.adjust(1)
     await message.answer(
         text="Savollar beriladigan kitob nomini tanlang",
-        reply_markup=await battle_main_ibuttons(
-            back_text="Ortga", back_callback="back_battle_main"
-        )
+        reply_markup=builder.as_markup()
     )
-    await state.clear()
 
 
 @router.callback_query(F.data.startswith("table_"))
@@ -60,9 +74,21 @@ async def uz_back(call: types.CallbackQuery):
 
 @router.callback_query(F.data == "back_select_book")
 async def uz_back_books(call: types.CallbackQuery):
+    all_books = await db.select_all_tables()
+    builder = InlineKeyboardBuilder()
+    for book in all_books:
+        if not book['questions']:
+            pass
+        else:
+            builder.add(
+                types.InlineKeyboardButton(
+                    text=f"{book['table_name']}", callback_data=f"table_{book['id']}"
+                )
+            )
+    builder.add(
+        types.InlineKeyboardButton(text=f"⬅️ Ortga", callback_data=f"back_battle_main")    )
+    builder.adjust(1)
     await call.message.edit_text(
         text="Savollar beriladigan kitob nomini tanlang",
-        reply_markup=await battle_main_ibuttons(
-            back_text="Ortga", back_callback="back_battle_main"
-        )
+        reply_markup=builder.as_markup()
     )
