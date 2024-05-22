@@ -86,7 +86,7 @@ async def uz_back_books(call: types.CallbackQuery):
                 )
             )
     builder.add(
-        types.InlineKeyboardButton(text=f"⬅️ Ortga", callback_data=f"back_battle_main")    )
+        types.InlineKeyboardButton(text=f"⬅️ Ortga", callback_data=f"back_battle_main"))
     builder.adjust(1)
     await call.message.edit_text(
         text="Savollar beriladigan kitob nomini tanlang",

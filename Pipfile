@@ -37,6 +37,7 @@ openpyxl = "==3.1.2"
 apscheduler = "==3.10.4"
 six = "*"
 sqlalchemy = "*"
+aiogram-dialog = "*"
 
 [dev-packages]
 

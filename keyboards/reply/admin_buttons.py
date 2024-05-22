@@ -6,9 +6,7 @@ admin_main_kb = ReplyKeyboardMarkup(
             KeyboardButton(text="📚 Kitob va savollar qo'shish bo'limi")
         ],
         [
-            KeyboardButton(text="👤 Foydalanuvchilar bo'limi")
-        ],
-        [
+            KeyboardButton(text="👤 Foydalanuvchilar bo'limi"),
             KeyboardButton(text="📊 Natijalar bo'limi")
         ],
         [
