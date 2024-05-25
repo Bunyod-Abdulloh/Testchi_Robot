@@ -2,6 +2,7 @@ import asyncio
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+
 from aiogram.client.session.middlewares.request_logging import logger
 from aiogram.fsm.strategy import FSMStrategy
 
@@ -84,7 +85,8 @@ def main():
     dispatcher = Dispatcher(storage=storage, fsm_strategy=FSMStrategy.CHAT)
     dispatcher.startup.register(aiogram_on_startup_polling)
     dispatcher.shutdown.register(aiogram_on_shutdown_polling)
-    asyncio.run(dispatcher.start_polling(bot, close_bot_session=True, allowed_updates=allowed_updates))
+    asyncio.run(dispatcher.start_polling(bot, close_bot_session=True, allowed_updates=allowed_updates,
+                                         polling_timeout=10))
 
 
 if __name__ == "__main__":
