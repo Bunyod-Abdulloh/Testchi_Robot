@@ -114,34 +114,43 @@ async def send_alone_result_or_continue(call: types.CallbackQuery, answer_emoji,
 async def alone_first(call: types.CallbackQuery, state: FSMContext):
     book_id = int(call.data.split(":")[1])
     telegram_id = call.from_user.id
-    c = 1
-    await generate_question_alone(
-        book_id=book_id, call=call, counter=c
+    get_user = await db.select_user(
+        telegram_id=telegram_id
     )
-    # Userni Results jadvalida bor yo'qligini tekshirish
-    check_in_results = await db.select_user_in_results(
-        telegram_id=telegram_id, book_id=book_id
-    )
-    if not check_in_results:
-        # Results jadvaliga userni qo'shish
-        await db.add_gamer(
+    if get_user is None:
+        await call.message.edit_text(
+            text="Bot yangilanganligi bois /start buyrug'ini kiritib o'yinni qayta boshlashingizni so'raymiz!"
+        )
+    else:
+        c = 1
+        await generate_question_alone(
+            book_id=book_id, call=call, counter=c
+        )
+        # Userni Results jadvalida bor yo'qligini tekshirish
+        check_in_results = await db.select_user_in_results(
             telegram_id=telegram_id, book_id=book_id
         )
-    # Users jadvalida userga game_on yoqish
-    await db.edit_status_users(
-        game_on=True, telegram_id=telegram_id
-    )
-    start_time = datetime.now()
-    await db.start_time_to_temporary(
-        telegram_id=telegram_id, battle_id=0, game_status="ON", start_time=start_time
-    )
-    await state.update_data(
-        alone=c
-    )
+        if not check_in_results:
+            # Results jadvaliga userni qo'shish
+            await db.add_gamer(
+                telegram_id=telegram_id, book_id=book_id
+            )
+        # Users jadvalida userga game_on yoqish
+        await db.edit_status_users(
+            game_on=True, telegram_id=telegram_id
+        )
+        start_time = datetime.now()
+        await db.start_time_to_temporary(
+            telegram_id=telegram_id, battle_id=0, game_status="ON", start_time=start_time
+        )
+        await state.update_data(
+            alone=c
+        )
 
 
 @router.callback_query(F.data.startswith("al_question:a"))
 async def alone_second(call: types.CallbackQuery, state: FSMContext):
+    await call.answer(cache_time=0)
     await send_alone_result_or_continue(
         call=call, answer_emoji="✅", state=state
     )
@@ -153,6 +162,7 @@ magic_alone = (F.data.startswith("al_question:b") | F.data.startswith("al_questi
 
 @router.callback_query(magic_alone)
 async def alone_third(call: types.CallbackQuery, state: FSMContext):
+    await call.answer(cache_time=0)
     await send_alone_result_or_continue(
         call=call, answer_emoji="❌", state=state
     )

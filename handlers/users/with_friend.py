@@ -11,21 +11,29 @@ router = Router()
 
 @router.callback_query(F.data.startswith("with_friend:"))
 async def with_friend_query(call: types.CallbackQuery, state: FSMContext):
-    book_id = call.data.split(":")[1]
-    await state.update_data(
-        friend_book_id=book_id
+    get_user = await db.select_user(
+        telegram_id=call.from_user.id
     )
-
-    await call.message.answer(
-        text="Diqqat qiling!!! \n\nSiz taklif qilmoqchi bo'lgan do'stingiz botimiz foydalanuvchisi bo'lishi lozim! "
-             "Faqat bitta do'stingizni taklif qilishingiz mumkin! Agar do'stingizdan javob kelmasa qayta "
-             "<b>⚔️ Bellashuv</b> tugmasini bosib boshqa do'stingizni bellashuvga taklif qilishingiz "
-             "mumkin!",
-        reply_markup=rival_offer_cbutton(
-            opponent_text="Do'stga taklif yuborish", back_text="Ortga"
+    if get_user is None:
+        await call.message.edit_text(
+            text="Bot yangilanganligi bois /start buyrug'ini kiritib o'yinni qayta boshlashingizni so'raymiz!"
         )
-    )
-    await call.message.delete()
+    else:
+        book_id = call.data.split(":")[1]
+        await state.update_data(
+            friend_book_id=book_id
+        )
+
+        await call.message.answer(
+            text="Diqqat qiling!!! \n\nSiz taklif qilmoqchi bo'lgan do'stingiz botimiz foydalanuvchisi bo'lishi lozim! "
+                 "Faqat bitta do'stingizni taklif qilishingiz mumkin! Agar do'stingizdan javob kelmasa qayta "
+                 "<b>⚔️ Bellashuv</b> tugmasini bosib boshqa do'stingizni bellashuvga taklif qilishingiz "
+                 "mumkin!",
+            reply_markup=rival_offer_cbutton(
+                opponent_text="Do'stga taklif yuborish", back_text="Ortga"
+            )
+        )
+        await call.message.delete()
 
 
 @router.message(F.user_shared)
@@ -35,7 +43,6 @@ async def friend_shared(message: types.Message, state: FSMContext):
     book_name = await db.select_book_by_id(
         id_=book_id
     )
-
     opponent_id = int(message.user_shared.user_id)
     user_id = message.from_user.id
     user_fullname = message.from_user.full_name

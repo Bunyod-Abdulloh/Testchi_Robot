@@ -13,54 +13,62 @@ router = Router()
 
 @router.callback_query(F.data.startswith("agree:"))
 async def get_opponent(call: types.CallbackQuery, state: FSMContext):
-    first_player_id = call.data.split(":")[1]
-    second_player_id = call.from_user.id
-    book_id = int(call.data.split(":")[2])
-    fullname = call.from_user.full_name
-    book_name = await db.select_book_by_id(
-        id_=book_id
+    get_user = await db.select_user(
+        telegram_id=call.from_user.id
     )
-    # Temporary jadvaliga user ma'lumotlarini qo'shib battle idsini olish
-    id_ = await db.add_battle_to_temporary(
-        telegram_id=first_player_id
-    )
-    battle_id = id_[0]
-    try:
-        await bot.send_message(
-            chat_id=first_player_id,
-            text=f"Foydalanuvchi {fullname} {book_name['table_name']} kitobi bo'yicha bellashuvga rozilik bildirdi!",
-            reply_markup=play_battle_ibuttons(
-                start_text="Boshlash", book_id=book_id, battle_id=battle_id
-            )
+    if get_user is None:
+        await call.message.edit_text(
+            text="Bot yangilanganligi bois /start buyrug'ini kiritib o'yinni qayta boshlashingizni so'raymiz!"
         )
-        c = 1
-        await state.update_data(
-            duet=c
+    else:
+        first_player_id = call.data.split(":")[1]
+        second_player_id = call.from_user.id
+        book_id = int(call.data.split(":")[2])
+        fullname = call.from_user.full_name
+        book_name = await db.select_book_by_id(
+            id_=book_id
         )
-        # Userni Results jadvalida bor yo'qligini tekshirish
-        check_in_results = await db.select_user_in_results(
-            telegram_id=second_player_id, book_id=book_id
-        )
-        if not check_in_results:
-            # Results jadvaliga userni qo'shish
-            await db.add_gamer(
-                telegram_id=second_player_id, book_id=book_id
-            )
-        # Users jadvalida userga game_on yoqish
-        await db.edit_status_users(
-            game_on=True, telegram_id=second_player_id
-        )
-        await generate_question(
-            book_id=book_id, counter=c, call=call, battle_id=battle_id, opponent=True
-        )
-        start_time = datetime.now()
-        await db.start_time_to_temporary(
-            telegram_id=second_player_id, battle_id=battle_id, game_status="ON", start_time=start_time
-        )
-    except aiogram.exceptions.TelegramForbiddenError:
-        await db.userni_ochir(
+        # Temporary jadvaliga user ma'lumotlarini qo'shib battle idsini olish
+        id_ = await db.add_battle_to_temporary(
             telegram_id=first_player_id
         )
+        battle_id = id_[0]
+        try:
+            await bot.send_message(
+                chat_id=first_player_id,
+                text=f"Foydalanuvchi {fullname} {book_name['table_name']} kitobi bo'yicha bellashuvga rozilik bildirdi!",
+                reply_markup=play_battle_ibuttons(
+                    start_text="Boshlash", book_id=book_id, battle_id=battle_id
+                )
+            )
+            c = 1
+            await state.update_data(
+                duet=c
+            )
+            # Userni Results jadvalida bor yo'qligini tekshirish
+            check_in_results = await db.select_user_in_results(
+                telegram_id=second_player_id, book_id=book_id
+            )
+            if not check_in_results:
+                # Results jadvaliga userni qo'shish
+                await db.add_gamer(
+                    telegram_id=second_player_id, book_id=book_id
+                )
+            # Users jadvalida userga game_on yoqish
+            await db.edit_status_users(
+                game_on=True, telegram_id=second_player_id
+            )
+            await generate_question(
+                book_id=book_id, counter=c, call=call, battle_id=battle_id, opponent=True
+            )
+            start_time = datetime.now()
+            await db.start_time_to_temporary(
+                telegram_id=second_player_id, battle_id=battle_id, game_status="ON", start_time=start_time
+            )
+        except aiogram.exceptions.TelegramForbiddenError:
+            await db.userni_ochir(
+                telegram_id=first_player_id
+            )
 
 
 @router.callback_query(F.data.startswith("refusal:"))

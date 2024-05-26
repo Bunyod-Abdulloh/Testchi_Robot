@@ -269,42 +269,50 @@ async def send_result_or_continue(answer_emoji, call: types.CallbackQuery, state
 
 @router.callback_query(F.data.startswith("book_id:"))
 async def get_random_in_battle(call: types.CallbackQuery):
-    book_id = int(call.data.split(':')[1])
-    book_name_ = await db.select_book_by_id(id_=book_id)
-    book_name = book_name_['table_name']
-    user_id = call.from_user.id
-    full_name = call.from_user.full_name
-
-    random_user = await db.select_user_random(
-        telegram_id=user_id
+    get_user = await db.select_user(
+        telegram_id=call.from_user.id
     )
-    not_battler = "Bellashish uchun raqib topilmadi! Raqib taklif qilishingiz yoki Yakka o'yin o'ynashingiz mumkin!"
-    if random_user is None:
+    if get_user is None:
         await call.message.edit_text(
-            text=not_battler
+            text="Bot yangilanganligi bois /start buyrug'ini kiritib o'yinni qayta boshlashingizni so'raymiz!"
         )
     else:
-        telegram_id = random_user['telegram_id']
-        markup = to_offer_ibuttons(
-            agree_text="Qabul qilish", agree_id=user_id, refusal_text="Rad qilish", book_id=book_id
+        book_id = int(call.data.split(':')[1])
+        book_name_ = await db.select_book_by_id(id_=book_id)
+        book_name = book_name_['table_name']
+        user_id = call.from_user.id
+        full_name = call.from_user.full_name
+
+        random_user = await db.select_user_random(
+            telegram_id=user_id
         )
-        try:
-            await bot.send_message(
-                chat_id=telegram_id,
-                text=f"Foydalanuvchi {full_name} Sizni {book_name} kitobi bo'yicha bellashuvga taklif qilmoqda!",
-                reply_markup=markup
+        not_battler = "Bellashish uchun raqib topilmadi! Raqib taklif qilishingiz yoki Yakka o'yin o'ynashingiz mumkin!"
+        if random_user is None:
+            await call.message.edit_text(
+                text=not_battler
             )
-            await call.answer(
-                text="Bellashuv taklifi yuborildi! Raqibingizdan javob kelmasa qayta Tasodifiy raqib bilan tugmasini "
-                     "bosing!", show_alert=True
+        else:
+            telegram_id = random_user['telegram_id']
+            markup = to_offer_ibuttons(
+                agree_text="Qabul qilish", agree_id=user_id, refusal_text="Rad qilish", book_id=book_id
             )
-        except aiogram.exceptions.TelegramForbiddenError:
-            await db.userni_ochir(
-                telegram_id=telegram_id
-            )
-            await call.answer(
-                text=not_battler, show_alert=True
-            )
+            try:
+                await bot.send_message(
+                    chat_id=telegram_id,
+                    text=f"Foydalanuvchi {full_name} Sizni {book_name} kitobi bo'yicha bellashuvga taklif qilmoqda!",
+                    reply_markup=markup
+                )
+                await call.answer(
+                    text="Bellashuv taklifi yuborildi! Raqibingizdan javob kelmasa qayta Tasodifiy raqib bilan "
+                         "tugmasini bosing!", show_alert=True
+                )
+            except aiogram.exceptions.TelegramForbiddenError:
+                await db.userni_ochir(
+                    telegram_id=telegram_id
+                )
+                await call.answer(
+                    text=not_battler, show_alert=True
+                )
 
 
 @router.callback_query(F.data.startswith("play_b:"))
@@ -340,6 +348,7 @@ async def start_playing(call: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data.startswith("question:a"))
 async def get_question_first_a(call: types.CallbackQuery, state: FSMContext):
+    await call.answer(cache_time=0)
     await send_result_or_continue(
         answer_emoji="✅", call=call, state=state
     )
@@ -351,6 +360,7 @@ first_answer_filter = (F.data.startswith("question:b") | F.data.startswith("ques
 
 @router.callback_query(first_answer_filter)
 async def get_question_first(call: types.CallbackQuery, state: FSMContext):
+    await call.answer(cache_time=0)
     await send_result_or_continue(
         answer_emoji="❌", call=call, state=state
     )
