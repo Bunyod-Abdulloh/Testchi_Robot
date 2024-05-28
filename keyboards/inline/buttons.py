@@ -1,8 +1,4 @@
-from aiogram.filters.callback_data import CallbackData
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-
-from loader import db
 
 
 def check_user_ibuttons(status: str):
@@ -70,7 +66,7 @@ def bot_offer_ibuttons(full_name: str, bot_link: str):
             [
                 InlineKeyboardButton(
                     text=f"🤖 Botdan foydalanish taklifini yuborish",
-                    switch_inline_query=f"\n\nFoydalanuvchi {full_name} Sizni ilmiy bellashuvga taklif qilmoqda! "
+                    switch_inline_query=f"\n\nFoydalanuvchi {full_name} Sizni bellashuvga taklif qilmoqda! "
                                         f"Manzil: {bot_link}"
                 )
             ]

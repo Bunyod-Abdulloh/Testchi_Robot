@@ -1,6 +1,7 @@
 from aiogram import Router, types, F
 from aiogram.fsm.context import FSMContext
 
+from handlers.users.battle_main import uz_battle_main
 from handlers.users.start import uz_start_buttons
 from keyboards.inline.buttons import to_offer_ibuttons, bot_offer_ibuttons
 from keyboards.reply.main_reply import rival_offer_cbutton
@@ -75,6 +76,16 @@ async def friend_shared(message: types.Message, state: FSMContext):
         await message.answer(
             text=f"Taklif qilinayotgan foydalanuvchi botimiz a'zolari safida mavjud emas!",
             reply_markup=bot_offer_ibuttons(
-                full_name=user_fullname, bot_link="@IqtisodchiRobot"
+                full_name=user_fullname, bot_link="@testchirobot"
             )
         )
+
+
+@router.message(F.text == "⬅️ Ortga")
+async def back_battle_main(message: types.Message, state: FSMContext):
+    await message.answer(
+        text=message.text, reply_markup=uz_start_buttons
+    )
+    await uz_battle_main(
+        message=message, state=state
+    )

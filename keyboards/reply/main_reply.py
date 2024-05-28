@@ -1,4 +1,4 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, KeyboardButtonRequestUser
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, KeyboardButtonRequestUser, WebAppInfo
 
 
 def main_button(competition: str, rating: str, manual: str, questions: str):
@@ -9,7 +9,9 @@ def main_button(competition: str, rating: str, manual: str, questions: str):
             ],
             [
                 KeyboardButton(text=f"📊 {rating}"),
-                KeyboardButton(text=f"ℹ️ {manual}")
+                KeyboardButton(text=f"ℹ️ {manual}", web_app=WebAppInfo(
+                    url="https://telegra.ph/Testchi-Robot--Qollanma-05-27"
+                ))
             ],
             [
                 KeyboardButton(text=f"❓ {questions}")

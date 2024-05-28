@@ -156,12 +156,24 @@ async def alone_second(call: types.CallbackQuery, state: FSMContext):
     )
 
 
-magic_alone = (F.data.startswith("al_question:b") | F.data.startswith("al_question:c") |
-               F.data.startswith("al_question:d"))
-
-
-@router.callback_query(magic_alone)
+@router.callback_query(F.data.startswith("al_question:b"))
 async def alone_third(call: types.CallbackQuery, state: FSMContext):
+    await call.answer(cache_time=0)
+    await send_alone_result_or_continue(
+        call=call, answer_emoji="❌", state=state
+    )
+
+
+@router.callback_query(F.data.startswith("al_question:c"))
+async def alone_four(call: types.CallbackQuery, state: FSMContext):
+    await call.answer(cache_time=0)
+    await send_alone_result_or_continue(
+        call=call, answer_emoji="❌", state=state
+    )
+
+
+@router.callback_query(F.data.startswith("al_question:d"))
+async def alone_five(call: types.CallbackQuery, state: FSMContext):
     await call.answer(cache_time=0)
     await send_alone_result_or_continue(
         call=call, answer_emoji="❌", state=state

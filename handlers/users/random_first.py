@@ -354,12 +354,24 @@ async def get_question_first_a(call: types.CallbackQuery, state: FSMContext):
     )
 
 
-first_answer_filter = (F.data.startswith("question:b") | F.data.startswith("question:c") |
-                       F.data.startswith("question:d"))
+@router.callback_query(F.data.startswith("question:b"))
+async def get_question_first_b(call: types.CallbackQuery, state: FSMContext):
+    await call.answer(cache_time=0)
+    await send_result_or_continue(
+        answer_emoji="❌", call=call, state=state
+    )
 
 
-@router.callback_query(first_answer_filter)
-async def get_question_first(call: types.CallbackQuery, state: FSMContext):
+@router.callback_query(F.data.startswith("question:c"))
+async def get_question_first_c(call: types.CallbackQuery, state: FSMContext):
+    await call.answer(cache_time=0)
+    await send_result_or_continue(
+        answer_emoji="❌", call=call, state=state
+    )
+
+
+@router.callback_query(F.data.startswith("question:d"))
+async def get_question_first_d(call: types.CallbackQuery, state: FSMContext):
     await call.answer(cache_time=0)
     await send_result_or_continue(
         answer_emoji="❌", call=call, state=state

@@ -101,8 +101,22 @@ second_answer_filter = (F.data.startswith("s_question:b") | F.data.startswith("s
                         F.data.startswith("s_question:d"))
 
 
-@router.callback_query(second_answer_filter)
-async def get_question_answer(call: types.CallbackQuery, state: FSMContext):
+@router.callback_query(F.data.startswith("s_question:b"))
+async def get_question_answer_b(call: types.CallbackQuery, state: FSMContext):
+    await send_result_or_continue(
+        answer_emoji="❌", call=call, opponent=True, state=state
+    )
+
+
+@router.callback_query(F.data.startswith("s_question:c"))
+async def get_question_answer_c(call: types.CallbackQuery, state: FSMContext):
+    await send_result_or_continue(
+        answer_emoji="❌", call=call, opponent=True, state=state
+    )
+
+
+@router.callback_query(F.data.startswith("s_question:d"))
+async def get_question_answer_d(call: types.CallbackQuery, state: FSMContext):
     await send_result_or_continue(
         answer_emoji="❌", call=call, opponent=True, state=state
     )
